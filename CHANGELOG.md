@@ -1,7 +1,7 @@
 # 2019-11-12
 
-配置文件: config.tpl.yaml 
-增加了: clear_up_expired_messages, 默认自动清理 `distributed_messages` 数据，设置为 false 不清理，可以结合定时任务在夜间凌晨清理
+* 配置文件: config.tpl.yaml
+* 增加了: clear_up_expired_messages, 默认自动清理 `distributed_messages` 数据，设置为 false 不清理，可以结合定时任务在夜间凌晨清理
 
 # 2019-11-05
 
