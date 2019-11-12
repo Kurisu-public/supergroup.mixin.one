@@ -47,6 +47,7 @@ type Config struct {
 	System struct {
 		MessageShardModifier   string   `yaml:"message_shard_modifier"`
 		MessageShardSize       int64    `yaml:"message_shard_size"`
+		ClearUpExpiredMessages bool     `yaml:"clear_up_expired_messages"`
 		PriceAssetsEnable      bool     `yaml:"price_asset_enable"`
 		AudioMessageEnable     bool     `yaml:"audio_message_enable"`
 		ImageMessageEnable     bool     `yaml:"image_message_enable"`
