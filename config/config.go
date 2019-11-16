@@ -5,7 +5,7 @@ import (
 	"log"
 	"path"
 
-	yaml "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
 )
 
 const ConfigFile = "config.yaml"
@@ -45,44 +45,48 @@ type Config struct {
 		Name     string `yaml:"database_name"`
 	} `yaml:"database"`
 	System struct {
-		MessageShardModifier   string   `yaml:"message_shard_modifier"`
-		MessageShardSize       int64    `yaml:"message_shard_size"`
-		PriceAssetsEnable      bool     `yaml:"price_asset_enable"`
-		AudioMessageEnable     bool     `yaml:"audio_message_enable"`
-		ImageMessageEnable     bool     `yaml:"image_message_enable"`
-		VideoMessageEnable     bool     `yaml:"video_message_enable"`
-		ContactMessageEnable   bool     `yaml:"contact_message_enable"`
-		LimitMessageDuration   int64    `yaml:"limit_message_duration"`
-		LimitMessageNumber     int      `yaml:"limit_message_number"`
-		DetectQRCodeEnabled    bool     `yaml:"detect_image"`
-		DetectLinkEnabled      bool     `yaml:"detect_link"`
-		OperatorList           []string `yaml:"operator_list"`
-		Operators              map[string]bool
-		PayToJoin              bool           `yaml:"pay_to_join"`
-		AccpetPaymentAssetList []PaymentAsset `yaml:"accept_asset_list"`
+		MessageShardModifier                       string   `yaml:"message_shard_modifier"`
+		MessageShardSize                           int64    `yaml:"message_shard_size"`
+		PriceAssetsEnable                          bool     `yaml:"price_asset_enable"`
+		AudioMessageEnable                         bool     `yaml:"audio_message_enable"`
+		ImageMessageEnable                         bool     `yaml:"image_message_enable"`
+		VideoMessageEnable                         bool     `yaml:"video_message_enable"`
+		ContactMessageEnable                       bool     `yaml:"contact_message_enable"`
+		LimitMessageDuration                       int64    `yaml:"limit_message_duration"`
+		LimitMessageNumber                         int      `yaml:"limit_message_number"`
+		DetectQRCodeEnabled                        bool     `yaml:"detect_image"`
+		DetectLinkEnabled                          bool     `yaml:"detect_link"`
+		KeywordRecallEnable                        bool     `yaml:"keyword_recall_enable"`
+		ImmediateDeleteExpiredDistributedMsgEnable bool     `yaml:"immediate_delete_expired_distributed_msg_enable"`
+		SuperOperatorList                          []string `yaml:"super_operator_list"`
+		OperatorList                               []string `yaml:"operator_list"`
+		Operators                                  map[string]bool
+		PayToJoin                                  bool           `yaml:"pay_to_join"`
+		AccpetPaymentAssetList                     []PaymentAsset `yaml:"accept_asset_list"`
 	} `yaml:"system"`
 	Appearance struct {
 		HomeWelcomeMessage string          `yaml:"home_welcome_message"`
 		HomeShortcutGroups []ShortcutGroup `yaml:"home_shortcut_groups"`
 	} `yaml:"appearance"`
 	MessageTemplate struct {
-		WelcomeMessage          string `yaml:"welcome_message"`
-		MessageTipsGuest        string `yaml:"message_tips_guest"`
-		MessageTipsHelp         string `yaml:"message_tips_help"`
-		GroupRedPacket          string `yaml:"group_redpacket"`
-		GroupRedPacketShortDesc string `yaml:"group_redpacket_short_desc"`
-		GroupRedPacketDesc      string `yaml:"group_redpacket_desc"`
-		GroupOpenedRedPacket    string `yaml:"group_opened_redpacket"`
-		MessageProhibit         string `yaml:"message_prohibit"`
-		MessageAllow            string `yaml:"message_allow"`
-		MessageTipsJoin         string `yaml:"message_tips_join"`
-		MessageTipsHelpBtn      string `yaml:"message_tips_help_btn"`
-		MessageTipsUnsubscribe  string `yaml:"message_tips_unsubscribe"`
-		MessageRewardLabel      string `yaml:"message_reward_label"`
-		MessageRewardMemo       string `yaml:"message_reward_memo"`
-		MessageTipsTooMany      string `yaml:"message_tips_too_many"`
-		MessageCommandsInfo     string `yaml:"message_commands_info"`
-		MessageCommandsInfoResp string `yaml:"message_commands_info_resp"`
+		WelcomeMessage          string          `yaml:"welcome_message"`
+		MessageTipsGuest        string          `yaml:"message_tips_guest"`
+		MessageTipsHelp         string          `yaml:"message_tips_help"`
+		GroupRedPacket          string          `yaml:"group_redpacket"`
+		GroupRedPacketShortDesc string          `yaml:"group_redpacket_short_desc"`
+		GroupRedPacketDesc      string          `yaml:"group_redpacket_desc"`
+		GroupOpenedRedPacket    string          `yaml:"group_opened_redpacket"`
+		MessageProhibit         string          `yaml:"message_prohibit"`
+		MessageAllow            string          `yaml:"message_allow"`
+		MessageTipsJoin         string          `yaml:"message_tips_join"`
+		MessageTipsHelpBtn      string          `yaml:"message_tips_help_btn"`
+		MessageTipsUnsubscribe  string          `yaml:"message_tips_unsubscribe"`
+		MessageRewardLabel      string          `yaml:"message_reward_label"`
+		MessageRewardMemo       string          `yaml:"message_reward_memo"`
+		MessageTipsTooMany      string          `yaml:"message_tips_too_many"`
+		MessageCommandsInfo     string          `yaml:"message_commands_info"`
+		MessageCommandsInfoResp string          `yaml:"message_commands_info_resp"`
+		KeywordRecallList       []KeywordRecall `yaml:"keyword_recall_list"`
 	} `yaml:"message_template"`
 	Mixin struct {
 		ClientId        string `yaml:"client_id"`
@@ -100,6 +104,12 @@ type ExportedConfig struct {
 	AccpetPaymentAssetList []PaymentAsset  `json:"accept_asset_list"`
 	HomeWelcomeMessage     string          `json:"home_welcome_message"`
 	HomeShortcutGroups     []ShortcutGroup `json:"home_shortcut_groups"`
+}
+
+type KeywordRecall struct {
+	Keyword  string `yaml:"keyword"`
+	Category string `yaml:"category"`
+	Data     string `yaml:"data"`
 }
 
 var AppConfig *Config
