@@ -10,6 +10,7 @@ import (
 
 const ConfigFile = "config.yaml"
 const BuildVersion = "BUILD_VERSION"
+const DefaultColor = "#46B8DA"
 
 type PaymentAsset struct {
 	Symbol  string `yaml:"symbol" json:"symbol"`
@@ -59,6 +60,7 @@ type Config struct {
 		KeywordRecallEnable                        bool     `yaml:"keyword_recall_enable"`
 		ImmediateDeleteExpiredDistributedMsgEnable bool     `yaml:"immediate_delete_expired_distributed_msg_enable"`
 		SuperOperatorList                          []string `yaml:"super_operator_list"`
+		SuperOperators                             map[string]bool
 		OperatorList                               []string `yaml:"operator_list"`
 		Operators                                  map[string]bool
 		PayToJoin                                  bool           `yaml:"pay_to_join"`
@@ -69,24 +71,25 @@ type Config struct {
 		HomeShortcutGroups []ShortcutGroup `yaml:"home_shortcut_groups"`
 	} `yaml:"appearance"`
 	MessageTemplate struct {
-		WelcomeMessage          string          `yaml:"welcome_message"`
-		MessageTipsGuest        string          `yaml:"message_tips_guest"`
-		MessageTipsHelp         string          `yaml:"message_tips_help"`
-		GroupRedPacket          string          `yaml:"group_redpacket"`
-		GroupRedPacketShortDesc string          `yaml:"group_redpacket_short_desc"`
-		GroupRedPacketDesc      string          `yaml:"group_redpacket_desc"`
-		GroupOpenedRedPacket    string          `yaml:"group_opened_redpacket"`
-		MessageProhibit         string          `yaml:"message_prohibit"`
-		MessageAllow            string          `yaml:"message_allow"`
-		MessageTipsJoin         string          `yaml:"message_tips_join"`
-		MessageTipsHelpBtn      string          `yaml:"message_tips_help_btn"`
-		MessageTipsUnsubscribe  string          `yaml:"message_tips_unsubscribe"`
-		MessageRewardLabel      string          `yaml:"message_reward_label"`
-		MessageRewardMemo       string          `yaml:"message_reward_memo"`
-		MessageTipsTooMany      string          `yaml:"message_tips_too_many"`
-		MessageCommandsInfo     string          `yaml:"message_commands_info"`
-		MessageCommandsInfoResp string          `yaml:"message_commands_info_resp"`
-		KeywordRecallList       []KeywordRecall `yaml:"keyword_recall_list"`
+		WelcomeMessage          string         `yaml:"welcome_message"`
+		MessageTipsGuest        string         `yaml:"message_tips_guest"`
+		MessageTipsHelp         string         `yaml:"message_tips_help"`
+		GroupRedPacket          string         `yaml:"group_redpacket"`
+		GroupRedPacketShortDesc string         `yaml:"group_redpacket_short_desc"`
+		GroupRedPacketDesc      string         `yaml:"group_redpacket_desc"`
+		GroupOpenedRedPacket    string         `yaml:"group_opened_redpacket"`
+		MessageProhibit         string         `yaml:"message_prohibit"`
+		MessageAllow            string         `yaml:"message_allow"`
+		MessageTipsJoin         string         `yaml:"message_tips_join"`
+		MessageTipsHelpBtn      string         `yaml:"message_tips_help_btn"`
+		MessageTipsUnsubscribe  string         `yaml:"message_tips_unsubscribe"`
+		MessageRewardLabel      string         `yaml:"message_reward_label"`
+		MessageRewardMemo       string         `yaml:"message_reward_memo"`
+		MessageTipsTooMany      string         `yaml:"message_tips_too_many"`
+		MessageCommandsInfo     string         `yaml:"message_commands_info"`
+		MessageCommandsInfoResp string         `yaml:"message_commands_info_resp"`
+		KeywordReplyList        []KeywordReply `yaml:"keyword_reply_list"`
+		KeyWords                map[string][]KeywordReplyMessage
 	} `yaml:"message_template"`
 	Mixin struct {
 		ClientId        string `yaml:"client_id"`
@@ -106,10 +109,27 @@ type ExportedConfig struct {
 	HomeShortcutGroups     []ShortcutGroup `json:"home_shortcut_groups"`
 }
 
-type KeywordRecall struct {
-	Keyword  string `yaml:"keyword"`
+type KeywordReply struct {
+	Keyword  string                `yaml:"keyword"`
+	Messages []KeywordReplyMessage `yaml:"messages"`
+}
+
+type KeywordReplyMessage struct {
 	Category string `yaml:"category"`
 	Data     string `yaml:"data"`
+}
+
+type AppButtonGroup struct {
+	Label  string `yaml:"label"`
+	Color  string `yaml:"color"`
+	Action string `yaml:"action"`
+}
+
+type AppCard struct {
+	IconURL     string `yaml:"icon_url"`
+	Title       string `yaml:"title"`
+	Description string `yaml:"description"`
+	Action      string `yaml:"action"`
 }
 
 var AppConfig *Config
@@ -124,9 +144,20 @@ func LoadConfig(dir string) {
 	if err != nil {
 		log.Fatalf("error: %v", err)
 	}
+	// operators
 	AppConfig.System.Operators = make(map[string]bool)
 	for _, op := range AppConfig.System.OperatorList {
 		AppConfig.System.Operators[op] = true
+	}
+	// super operators
+	AppConfig.System.SuperOperators = make(map[string]bool)
+	for _, sop := range AppConfig.System.SuperOperatorList {
+		AppConfig.System.SuperOperators[sop] = true
+	}
+	// keywords
+	AppConfig.MessageTemplate.KeyWords = make(map[string][]KeywordReplyMessage)
+	for _, kw := range AppConfig.MessageTemplate.KeywordReplyList {
+		AppConfig.MessageTemplate.KeyWords[kw.Keyword] = kw.Messages
 	}
 }
 

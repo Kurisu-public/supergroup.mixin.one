@@ -21,7 +21,7 @@ system:
   limit_message_number: 0 # number: 5 60s 5 条
   detect_image: false
   detect_link: false
-  keyword_recall_enable: true
+  keyword_reply_enable: true
   immediate_delete_expired_distributed_msg_enable: true
   super_operator_list:
     - "e9a5b807-fa8b-455a-8dfa-b189d28310ff"
@@ -65,11 +65,13 @@ message_template:
   message_commands_info_resp: "当前订阅人数: %d"
   keyword_recall_list:
     - keyword: "签到"
-      category: "APP_BUTTON_GROUP"
-      data: "[{\"label\": \"Mixin Website\", \"color\": \"#ABABAB\", \"action\": \"https://mixin.one\"}, ...]"
-    - keyword: "kyc"
-      category: "APP_CARD"
-      data: "{\"icon_url\": \"https://mixin.one/assets/98b586edb270556d1972112bd7985e9e.png\", \"title\": \"Mixin\", \"description\": \"A free and lightning fast peer-to-peer transactional network for digital assets.\", \"action\": \"https://mixin.one\"}"
+      messages:
+        - category: "PLAIN_TEXT"
+          data: "Hi"
+        - category: "APP_BUTTON_GROUP"
+          data: "[{\"label\": \"Mixin Website\", \"color\": \"#ABABAB\", \"action\": \"https://mixin.one\"}]"
+        - category: "APP_CARD"
+          data: "{\"icon_url\": \"https://mixin.one/assets/98b586edb270556d1972112bd7985e9e.png\", \"title\": \"Mixin\", \"description\": \"A free and lightning fast peer-to-peer transactional network for digital assets.\", \"action\": \"https://mixin.one\"}"
 
 mixin:
   client_id: "5fcd897e-e7b2-40d5-93cd-487e2d955556"
