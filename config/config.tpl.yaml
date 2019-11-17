@@ -21,8 +21,8 @@ system:
   limit_message_number:                            0 # number: 5 60s 5 条
   detect_image:                                    false
   detect_link:                                     false
-  keyword_reply_enable:                            true
-  immediate_delete_expired_distributed_msg_enable: true
+  keyword_reply_enable:                            false
+  immediate_delete_expired_distributed_msg_enable: false
   super_operator_list:
     - "e9a5b807-fa8b-455a-8dfa-b189d28310ff"
   operator_list:
