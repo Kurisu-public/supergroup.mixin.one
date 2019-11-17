@@ -12,13 +12,14 @@ import (
 	"strings"
 	"time"
 
-	bot "github.com/MixinNetwork/bot-api-go-client"
+	"github.com/MixinNetwork/bot-api-go-client"
+	"github.com/gofrs/uuid"
+	"mvdan.cc/xurls"
+
 	"github.com/MixinNetwork/supergroup.mixin.one/config"
 	"github.com/MixinNetwork/supergroup.mixin.one/interceptors"
 	"github.com/MixinNetwork/supergroup.mixin.one/models"
 	"github.com/MixinNetwork/supergroup.mixin.one/session"
-	"github.com/gofrs/uuid"
-	"mvdan.cc/xurls"
 )
 
 type Attachment struct {
@@ -99,11 +100,11 @@ func sendTextMessage(ctx context.Context, mc *MessageContext, conversationId, la
 	return nil
 }
 
-func sendAppButton(ctx context.Context, mc *MessageContext, label, conversationId, action string) error {
+func sendAppButton(ctx context.Context, mc *MessageContext, label, conversationId, action, color string) error {
 	btns, err := json.Marshal([]interface{}{map[string]string{
 		"label":  label,
 		"action": action,
-		"color":  "#46B8DA",
+		"color":  color,
 	}})
 	if err != nil {
 		return session.BlazeServerError(ctx, err)
@@ -115,6 +116,52 @@ func sendAppButton(ctx context.Context, mc *MessageContext, label, conversationI
 		"data":            base64.StdEncoding.EncodeToString(btns),
 	}
 	err = writeMessageAndWait(ctx, mc, "CREATE_MESSAGE", params)
+	if err != nil {
+		return session.BlazeServerError(ctx, err)
+	}
+	return nil
+}
+
+func sendRawAppButton(ctx context.Context, mc *MessageContext, conversationId string, jsonRawString []byte) error {
+	params := map[string]interface{}{
+		"conversation_id": conversationId,
+		"message_id":      bot.UuidNewV4().String(),
+		"category":        "APP_BUTTON_GROUP",
+		"data":            base64.StdEncoding.EncodeToString(jsonRawString),
+	}
+	err := writeMessageAndWait(ctx, mc, "CREATE_MESSAGE", params)
+	if err != nil {
+		return session.BlazeServerError(ctx, err)
+	}
+	return nil
+}
+
+func sendAppCard(ctx context.Context, mc *MessageContext, conversationId string, appCard config.AppCard) error {
+	bytes, err := json.Marshal(appCard)
+	if err != nil {
+		return session.BlazeServerError(ctx, err)
+	}
+	params := map[string]interface{}{
+		"conversation_id": conversationId,
+		"message_id":      bot.UuidNewV4().String(),
+		"category":        "APP_CARD",
+		"data":            base64.StdEncoding.EncodeToString(bytes),
+	}
+	err = writeMessageAndWait(ctx, mc, "CREATE_MESSAGE", params)
+	if err != nil {
+		return session.BlazeServerError(ctx, err)
+	}
+	return nil
+}
+
+func sendRawAppCard(ctx context.Context, mc *MessageContext, conversationId string, jsonRawString []byte) error {
+	params := map[string]interface{}{
+		"conversation_id": conversationId,
+		"message_id":      bot.UuidNewV4().String(),
+		"category":        "APP_CARD",
+		"data":            base64.StdEncoding.EncodeToString(jsonRawString),
+	}
+	err := writeMessageAndWait(ctx, mc, "CREATE_MESSAGE", params)
 	if err != nil {
 		return session.BlazeServerError(ctx, err)
 	}
