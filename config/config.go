@@ -57,7 +57,7 @@ type Config struct {
 		LimitMessageNumber                         int      `yaml:"limit_message_number"`
 		DetectQRCodeEnabled                        bool     `yaml:"detect_image"`
 		DetectLinkEnabled                          bool     `yaml:"detect_link"`
-		KeywordRecallEnable                        bool     `yaml:"keyword_recall_enable"`
+		KeywordReplyEnable                         bool     `yaml:"keyword_reply_enable"`
 		ImmediateDeleteExpiredDistributedMsgEnable bool     `yaml:"immediate_delete_expired_distributed_msg_enable"`
 		SuperOperatorList                          []string `yaml:"super_operator_list"`
 		SuperOperators                             map[string]bool
@@ -89,7 +89,7 @@ type Config struct {
 		MessageCommandsInfo     string         `yaml:"message_commands_info"`
 		MessageCommandsInfoResp string         `yaml:"message_commands_info_resp"`
 		KeywordReplyList        []KeywordReply `yaml:"keyword_reply_list"`
-		KeyWords                map[string][]KeywordReplyMessage
+		Keywords                map[string][]KeywordReplyMessage
 	} `yaml:"message_template"`
 	Mixin struct {
 		ClientId        string `yaml:"client_id"`
@@ -155,9 +155,9 @@ func LoadConfig(dir string) {
 		AppConfig.System.SuperOperators[sop] = true
 	}
 	// keywords
-	AppConfig.MessageTemplate.KeyWords = make(map[string][]KeywordReplyMessage)
+	AppConfig.MessageTemplate.Keywords = make(map[string][]KeywordReplyMessage)
 	for _, kw := range AppConfig.MessageTemplate.KeywordReplyList {
-		AppConfig.MessageTemplate.KeyWords[kw.Keyword] = kw.Messages
+		AppConfig.MessageTemplate.Keywords[kw.Keyword] = kw.Messages
 	}
 }
 
