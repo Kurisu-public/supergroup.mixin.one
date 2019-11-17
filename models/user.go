@@ -13,11 +13,12 @@ import (
 	"strings"
 	"time"
 
-	bot "github.com/MixinNetwork/bot-api-go-client"
+	"github.com/MixinNetwork/bot-api-go-client"
+	"github.com/dgrijalva/jwt-go"
+
 	"github.com/MixinNetwork/supergroup.mixin.one/config"
 	"github.com/MixinNetwork/supergroup.mixin.one/durable"
 	"github.com/MixinNetwork/supergroup.mixin.one/session"
-	jwt "github.com/dgrijalva/jwt-go"
 )
 
 const (
@@ -420,6 +421,13 @@ func (user *User) GetRole() string {
 
 func (user *User) isAdmin() bool {
 	if config.AppConfig.System.Operators[user.UserId] {
+		return true
+	}
+	return false
+}
+
+func (user *User) isSuperAdmin() bool {
+	if config.AppConfig.System.SuperOperators[user.UserId] {
 		return true
 	}
 	return false
