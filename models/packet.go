@@ -5,6 +5,7 @@ import (
 	"crypto/md5"
 	"database/sql"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"io"
 	"math/rand"
@@ -13,12 +14,13 @@ import (
 	"time"
 	"unicode/utf8"
 
-	bot "github.com/MixinNetwork/bot-api-go-client"
-	number "github.com/MixinNetwork/go-number"
+	"github.com/MixinNetwork/bot-api-go-client"
+	"github.com/MixinNetwork/go-number"
+	"github.com/gofrs/uuid"
+
 	"github.com/MixinNetwork/supergroup.mixin.one/config"
 	"github.com/MixinNetwork/supergroup.mixin.one/durable"
 	"github.com/MixinNetwork/supergroup.mixin.one/session"
-	"github.com/gofrs/uuid"
 )
 
 const (
@@ -398,14 +400,16 @@ func readPacketWithAssetAndUser(ctx context.Context, tx *sql.Tx, packetId string
 		return nil, err
 	}
 	if packet.Asset == nil {
-		return nil, nil
+		// tmp patch
+		return nil, errors.New("Error: read packet asset error , packet.Asset is nil")
 	}
 	packet.User, err = findUserById(ctx, tx, packet.UserId)
 	if err != nil {
 		return nil, err
 	}
 	if packet.User == nil {
-		return nil, nil
+		// tmp patch
+		return nil, errors.New("Error: read packet user error , packet.User is nil")
 	}
 	return packet, nil
 }
