@@ -11,11 +11,12 @@ import (
 	"time"
 	"unicode/utf8"
 
-	bot "github.com/MixinNetwork/bot-api-go-client"
+	"github.com/MixinNetwork/bot-api-go-client"
+	"github.com/gofrs/uuid"
+
 	"github.com/MixinNetwork/supergroup.mixin.one/config"
 	"github.com/MixinNetwork/supergroup.mixin.one/durable"
 	"github.com/MixinNetwork/supergroup.mixin.one/session"
-	"github.com/gofrs/uuid"
 )
 
 const (
@@ -80,7 +81,8 @@ func CreateMessage(ctx context.Context, user *User, messageId, category, quoteMe
 	if len(data) > 5*1024 {
 		return nil, nil
 	}
-	if !user.isAdmin() && user.UserId != config.AppConfig.Mixin.ClientId {
+	// is superAdmin
+	if !user.isSuperAdmin() && user.UserId != config.AppConfig.Mixin.ClientId {
 		b, err := ReadProhibitedProperty(ctx)
 		if err != nil {
 			return nil, err
