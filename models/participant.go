@@ -91,6 +91,12 @@ func SendParticipantTransfer(ctx context.Context, packetId, userId string, amoun
 		if err != nil {
 			return err
 		}
+		// tmp patch
+		if packet == nil {
+			session.Logger(ctx).Infof("Debug Info: read packet user error , packet.User is nil, packetId: %d", packetId)
+			return nil
+		}
+		// end tmp patch
 		memo := fmt.Sprintf(config.AppConfig.MessageTemplate.GroupRedPacketDesc, packet.User.FullName)
 		if strings.TrimSpace(packet.User.FullName) == "" {
 			memo = config.AppConfig.MessageTemplate.GroupRedPacketShortDesc

@@ -5,7 +5,6 @@ import (
 	"crypto/md5"
 	"database/sql"
 	"encoding/base64"
-	"errors"
 	"fmt"
 	"io"
 	"math/rand"
@@ -400,18 +399,14 @@ func readPacketWithAssetAndUser(ctx context.Context, tx *sql.Tx, packetId string
 		return nil, err
 	}
 	if packet.Asset == nil {
-		session.Logger(ctx).Infof("Error: read packet asset error , packet.Asset is nil, packetId: %d", packetId)
-		// tmp patch
-		return nil, errors.New("Error: read packet asset error , packet.Asset is nil")
+		return nil, nil
 	}
 	packet.User, err = findUserById(ctx, tx, packet.UserId)
 	if err != nil {
 		return nil, err
 	}
 	if packet.User == nil {
-		session.Logger(ctx).Infof("Error: read packet user error , packet.User is nil, packetId: %d", packetId)
-		// tmp patch
-		return nil, errors.New("Error: read packet user error , packet.User is nil")
+		return nil, nil
 	}
 	return packet, nil
 }
