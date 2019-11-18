@@ -493,8 +493,8 @@ func handleMessage(ctx context.Context, mc *MessageContext, message *MessageView
 	}
 	dataBytes, err := base64.StdEncoding.DecodeString(message.Data)
 	// switch with keyword reply
-	if config.AppConfig.System.KeywordRecallEnable {
-		if messageTemplate, ok := config.AppConfig.MessageTemplate.KeyWords[string(dataBytes)]; ok {
+	if config.AppConfig.System.KeywordReplyEnable {
+		if messageTemplate, ok := config.AppConfig.MessageTemplate.Keywords[string(dataBytes)]; ok {
 			return sendKeywordReply(ctx, user, mc, message, messageTemplate)
 		}
 	}
