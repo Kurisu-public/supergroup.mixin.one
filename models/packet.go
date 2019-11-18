@@ -392,6 +392,8 @@ func handlePacketExpiration(ctx context.Context, tx *sql.Tx, packet *Packet) err
 
 func readPacketWithAssetAndUser(ctx context.Context, tx *sql.Tx, packetId string) (*Packet, error) {
 	packet, err := readPacket(ctx, tx, packetId)
+	// tmp patch
+
 	if err != nil || packet == nil {
 		return nil, err
 	}
@@ -400,6 +402,7 @@ func readPacketWithAssetAndUser(ctx context.Context, tx *sql.Tx, packetId string
 		return nil, err
 	}
 	if packet.Asset == nil {
+		session.Logger(ctx).Infof("Error: read packet asset error , packet.Asset is nil, packetId: %d", packetId)
 		// tmp patch
 		return nil, errors.New("Error: read packet asset error , packet.Asset is nil")
 	}
@@ -408,6 +411,7 @@ func readPacketWithAssetAndUser(ctx context.Context, tx *sql.Tx, packetId string
 		return nil, err
 	}
 	if packet.User == nil {
+		session.Logger(ctx).Infof("Error: read packet user error , packet.User is nil, packetId: %d", packetId)
 		// tmp patch
 		return nil, errors.New("Error: read packet user error , packet.User is nil")
 	}
