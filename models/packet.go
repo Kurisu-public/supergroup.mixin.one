@@ -392,8 +392,6 @@ func handlePacketExpiration(ctx context.Context, tx *sql.Tx, packet *Packet) err
 
 func readPacketWithAssetAndUser(ctx context.Context, tx *sql.Tx, packetId string) (*Packet, error) {
 	packet, err := readPacket(ctx, tx, packetId)
-	// tmp patch
-
 	if err != nil || packet == nil {
 		return nil, err
 	}
