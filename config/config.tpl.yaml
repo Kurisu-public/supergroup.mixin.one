@@ -63,7 +63,7 @@ message_template:
   message_tips_too_many:      "发送太频繁"
   message_commands_info:      "/INFO"
   message_commands_info_resp: "当前订阅人数: %d"
-  keyword_recall_list:
+  keyword_reply_list:
     - keyword: "签到"
       messages:
         - category: "PLAIN_TEXT"
