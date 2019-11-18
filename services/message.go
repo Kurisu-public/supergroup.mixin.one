@@ -12,12 +12,13 @@ import (
 	"time"
 	"unicode/utf8"
 
-	bot "github.com/MixinNetwork/bot-api-go-client"
-	number "github.com/MixinNetwork/go-number"
+	"github.com/MixinNetwork/bot-api-go-client"
+	"github.com/MixinNetwork/go-number"
+	"github.com/gorilla/websocket"
+
 	"github.com/MixinNetwork/supergroup.mixin.one/config"
 	"github.com/MixinNetwork/supergroup.mixin.one/models"
 	"github.com/MixinNetwork/supergroup.mixin.one/session"
-	"github.com/gorilla/websocket"
 )
 
 const (
@@ -363,12 +364,12 @@ func handleTransfer(ctx context.Context, mc *MessageContext, transfer TransferVi
 	} else if packet, err := models.PayPacket(ctx, id.String(), transfer.AssetId, transfer.Amount); err != nil || packet == nil {
 		return err
 	} else if packet.State == models.PacketStatePaid {
-		return sendAppCard(ctx, mc, packet)
+		return sendPacketAppCard(ctx, mc, packet)
 	}
 	return nil
 }
 
-func sendAppCard(ctx context.Context, mc *MessageContext, packet *models.Packet) error {
+func sendPacketAppCard(ctx context.Context, mc *MessageContext, packet *models.Packet) error {
 	description := fmt.Sprintf(config.AppConfig.MessageTemplate.GroupRedPacketDesc, packet.User.FullName)
 	if strings.TrimSpace(packet.User.FullName) == "" {
 		description = config.AppConfig.MessageTemplate.GroupRedPacketShortDesc
@@ -491,6 +492,12 @@ func handleMessage(ctx context.Context, mc *MessageContext, message *MessageView
 		return sendTextMessage(ctx, mc, message.ConversationId, config.AppConfig.MessageTemplate.MessageTipsUnsubscribe)
 	}
 	dataBytes, err := base64.StdEncoding.DecodeString(message.Data)
+	// switch with keyword reply
+	if config.AppConfig.System.KeywordRecallEnable {
+		if messageTemplate, ok := config.AppConfig.MessageTemplate.KeyWords[string(dataBytes)]; ok {
+			return sendKeywordReply(ctx, user, mc, message, messageTemplate)
+		}
+	}
 	if err != nil {
 		return session.BadDataError(ctx)
 	} else if len(dataBytes) < 10 {
@@ -512,8 +519,30 @@ func sendHelpMessge(ctx context.Context, user *models.User, mc *MessageContext, 
 	if err := sendTextMessage(ctx, mc, message.ConversationId, config.AppConfig.MessageTemplate.MessageTipsHelp); err != nil {
 		return err
 	}
-	if err := sendAppButton(ctx, mc, config.AppConfig.MessageTemplate.MessageTipsHelpBtn, message.ConversationId, config.AppConfig.Service.HTTPResourceHost); err != nil {
+	if err := sendAppButton(ctx, mc, config.AppConfig.MessageTemplate.MessageTipsHelpBtn, message.ConversationId, config.AppConfig.Service.HTTPResourceHost, config.DefaultColor); err != nil {
 		return err
+	}
+	return nil
+}
+
+func sendKeywordReply(ctx context.Context, user *models.User, mc *MessageContext, message *MessageView, replyMessages []config.KeywordReplyMessage) error {
+	for _, msg := range replyMessages {
+		switch msg.Category {
+		case "PLAIN_TEXT":
+			if err := sendTextMessage(ctx, mc, message.ConversationId, msg.Data); err != nil {
+				return err
+			}
+		case "APP_BUTTON_GROUP":
+			// send app button
+			if err := sendRawAppButton(ctx, mc, message.ConversationId, []byte(msg.Data)); err != nil {
+				return err
+			}
+		case "APP_CARD":
+			// send app card
+			if err := sendRawAppCard(ctx, mc, message.ConversationId, []byte(msg.Data)); err != nil {
+				return err
+			}
+		}
 	}
 	return nil
 }
