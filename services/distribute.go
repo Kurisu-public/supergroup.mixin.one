@@ -9,20 +9,21 @@ import (
 	"time"
 
 	"github.com/MixinNetwork/bot-api-go-client"
+	"github.com/gofrs/uuid"
 
 	"github.com/MixinNetwork/supergroup.mixin.one/config"
 	"github.com/MixinNetwork/supergroup.mixin.one/models"
 	"github.com/MixinNetwork/supergroup.mixin.one/session"
 )
 
-func distribute(ctx context.Context) {
+func distribute(ctx context.Context, wb chan []byte) {
 	limit := int64(80)
 	system := config.AppConfig.System
 	shards := make([]string, system.MessageShardSize)
 	for i := int64(0); i < system.MessageShardSize; i++ {
 		shard := shardId(system.MessageShardModifier, i)
 		shards[i] = shard
-		go pendingActiveDistributedMessages(ctx, shard, limit)
+		go pendingActiveDistributedMessages(ctx, shard, limit, wb)
 	}
 
 	var t *time.Ticker
@@ -46,7 +47,7 @@ func distribute(ctx context.Context) {
 	}
 }
 
-func pendingActiveDistributedMessages(ctx context.Context, shard string, limit int64) {
+func pendingActiveDistributedMessages(ctx context.Context, shard string, limit int64, wb chan []byte) {
 	for {
 		messages, err := models.PendingActiveDistributedMessages(ctx, shard, limit)
 		if err != nil {
@@ -58,7 +59,7 @@ func pendingActiveDistributedMessages(ctx context.Context, shard string, limit i
 			time.Sleep(500 * time.Millisecond)
 			continue
 		}
-		err = sendDistributedMessges(ctx, shard, messages)
+		err = sendDistributedMessges(ctx, shard, messages, wb)
 		if err != nil {
 			session.Logger(ctx).Errorf("PendingActiveDistributedMessages sendDistributedMessges ERROR: %+v", err)
 			time.Sleep(100 * time.Millisecond)
@@ -73,51 +74,65 @@ func pendingActiveDistributedMessages(ctx context.Context, shard string, limit i
 	}
 }
 
-func sendDistributedMessges(ctx context.Context, key string, messages []*models.DistributedMessage) error {
-	var body []map[string]interface{}
+func sendDistributedMessges(ctx context.Context, key string, messages []*models.DistributedMessage, wb chan []byte) error {
+	//var body map[string]interface{}
 	for _, message := range messages {
-		if message.UserId == config.AppConfig.Mixin.ClientId {
-			message.UserId = ""
-		}
+		//if message.UserId == config.AppConfig.Mixin.ClientId {
+		//	message.UserId = ""
+		//}
 		if message.Category == models.MessageCategoryMessageRecall {
 			message.UserId = ""
 		}
-		body = append(body, map[string]interface{}{
-			"conversation_id":   message.ConversationId,
-			"recipient_id":      message.RecipientId,
-			"message_id":        message.MessageId,
-			"quote_message_id":  message.QuoteMessageId,
-			"category":          message.Category,
-			"data":              message.Data,
-			"representative_id": message.UserId,
-			"created_at":        message.CreatedAt,
-			"updated_at":        message.CreatedAt,
-		})
+		id, err := uuid.NewV4()
+		if err != nil {
+			return err
+		}
+		body := map[string]interface{}{
+			"id":     id,
+			"action": "CREATE_PLAIN_MESSAGES",
+			"params": map[string][]map[string]interface{}{
+				"messages": {
+					{
+						"conversation_id":   message.ConversationId,
+						"recipient_id":      message.RecipientId,
+						"message_id":        message.MessageId,
+						"representative_id": message.UserId,
+						"quote_message_id":  message.QuoteMessageId,
+						"category":          message.Category,
+						"data":              message.Data,
+						//"created_at":        message.CreatedAt,
+						//"updated_at":        message.CreatedAt,
+					},
+				},
+			},
+		}
+		msgs, err := json.Marshal(body)
+		if err != nil {
+			return err
+		}
+		wb <- msgs
 	}
 
-	msgs, err := json.Marshal(body)
-	if err != nil {
-		return err
-	}
-	mixin := config.AppConfig.Mixin
-	accessToken, err := bot.SignAuthenticationToken(mixin.ClientId, mixin.SessionId, mixin.SessionKey, "POST", "/messages", string(msgs))
-	if err != nil {
-		return err
-	}
-	data, err := request(ctx, key, "POST", "/messages", msgs, accessToken)
-	if err != nil {
-		return err
-	}
-	var resp struct {
-		Error bot.Error `json:"error"`
-	}
-	err = json.Unmarshal(data, &resp)
-	if err != nil {
-		return err
-	}
-	if resp.Error.Code > 0 {
-		return resp.Error
-	}
+	//mixin := config.AppConfig.Mixin
+	//accessToken, err := bot.SignAuthenticationToken(mixin.ClientId, mixin.SessionId, mixin.SessionKey, "POST", "/messages", string(msgs))
+	//if err != nil {
+	//	return err
+	//}
+	//data, err := request(ctx, key, "POST", "/messages", msgs, accessToken)
+	//if err != nil {
+	//	return err
+	//}
+	//var resp struct {
+	//	Error bot.Error `json:"error"`
+	//}
+	//err = json.Unmarshal(data, &resp)
+	//if err != nil {
+	//	return err
+	//}
+	//if resp.Error.Code > 0 {
+	//	return resp.Error
+	//}
+
 	return nil
 }
 

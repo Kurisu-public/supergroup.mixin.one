@@ -134,9 +134,9 @@ func (message *Message) Distribute(ctx context.Context) error {
 			defer stmt.Close()
 			for _, user := range users {
 				message.LastDistributeAt = user.SubscribedAt
-				if user.UserId == message.UserId {
-					continue
-				}
+				//if user.UserId == message.UserId {
+				//	continue
+				//}
 				messageId := UniqueConversationId(user.UserId, message.MessageId)
 				if set[messageId] {
 					continue

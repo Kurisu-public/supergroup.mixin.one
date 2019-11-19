@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"strings"
 	"sync"
 	"time"
@@ -73,7 +74,8 @@ type MessageContext struct {
 }
 
 func (service *MessageService) Run(ctx context.Context) error {
-	go distribute(ctx)
+	wb := make(chan []byte, 102400*10)
+	go distribute(ctx, wb)
 	go loopPendingMessages(ctx)
 	go handlePendingParticipants(ctx)
 	go handleExpiredPackets(ctx)
@@ -81,7 +83,7 @@ func (service *MessageService) Run(ctx context.Context) error {
 	go loopPendingSuccessMessages(ctx)
 
 	for {
-		err := service.loop(ctx)
+		err := service.loop(ctx, wb)
 		if err != nil {
 			session.Logger(ctx).Error(err)
 		}
@@ -91,7 +93,7 @@ func (service *MessageService) Run(ctx context.Context) error {
 	return nil
 }
 
-func (service *MessageService) loop(ctx context.Context) error {
+func (service *MessageService) loop(ctx context.Context, wb chan []byte) error {
 	conn, err := ConnectMixinBlaze(config.AppConfig.Mixin.ClientId, config.AppConfig.Mixin.SessionId, config.AppConfig.Mixin.SessionKey)
 	if err != nil {
 		return err
@@ -104,7 +106,7 @@ func (service *MessageService) loop(ctx context.Context) error {
 		WriteDone:      make(chan bool, 1),
 		DistributeDone: make(chan bool, 1),
 		ReadBuffer:     make(chan MessageView, 102400),
-		WriteBuffer:    make(chan []byte, 102400),
+		WriteBuffer:    wb,
 		RecipientId:    make(map[string]time.Time, 0),
 	}
 
@@ -194,6 +196,7 @@ func writePump(ctx context.Context, conn *websocket.Conn, mc *MessageContext) er
 	for {
 		select {
 		case data := <-mc.WriteBuffer:
+			log.Println(string(data))
 			err := writeGzipToConn(ctx, conn, data)
 			if err != nil {
 				return session.BlazeServerError(ctx, err)
@@ -278,6 +281,10 @@ func parseMessage(ctx context.Context, mc *MessageContext, wsReader io.Reader) e
 	if err = json.NewDecoder(gzReader).Decode(&message); err != nil {
 		return session.BlazeServerError(ctx, err)
 	}
+
+	log.Printf("\x1b[31mBlaze Message Log: \x1b[0m")
+	bytes, _ := json.Marshal(message)
+	log.Println(string(bytes))
 
 	transaction := mc.Transactions.retrive(message.Id)
 	if transaction != nil {
