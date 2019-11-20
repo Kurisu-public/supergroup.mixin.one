@@ -90,7 +90,7 @@ func (current *User) CreatePacket(ctx context.Context, assetId string, amount nu
 		return nil, err
 	}
 	if config.AppConfig.System.PriceAssetsEnable {
-		if number.FromString(asset.PriceUSD).Cmp(number.Zero()) <= 0 {
+		if number.FromString(asset.PriceUSD).Cmp(number.FromString(config.AppConfig.System.MinimumUsdtPrice)) < 0 {
 			return nil, session.BadDataError(ctx)
 		}
 	}
@@ -121,10 +121,20 @@ func (current *User) createPacket(ctx context.Context, asset *Asset, amount numb
 	if number.FromString(asset.Balance).Cmp(amount) < 0 {
 		return nil, session.InsufficientAccountBalanceError(ctx)
 	}
-	participantsCount, err := current.Prepare(ctx)
-	if err != nil {
-		return nil, err
+
+	var (
+		participantsCount int64
+		err               error
+	)
+	if config.AppConfig.System.MaximumPacketNumber == 0 {
+		participantsCount, err = current.Prepare(ctx)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		participantsCount = config.AppConfig.System.MaximumPacketNumber
 	}
+
 	if totalCount <= 0 || totalCount > int64(participantsCount) {
 		return nil, session.BadDataError(ctx)
 	}
