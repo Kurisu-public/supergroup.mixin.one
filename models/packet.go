@@ -90,7 +90,14 @@ func (current *User) CreatePacket(ctx context.Context, assetId string, amount nu
 		return nil, err
 	}
 	if config.AppConfig.System.PriceAssetsEnable {
-		if number.FromString(asset.PriceUSD).Cmp(number.FromString(config.AppConfig.System.MinimumUsdtPrice)) < 0 {
+		var minimumUsdtPrice string
+		if config.AppConfig.System.MinimumUsdtPrice == "" {
+			minimumUsdtPrice = "0"
+		} else {
+			minimumUsdtPrice = config.AppConfig.System.MinimumUsdtPrice
+		}
+
+		if number.FromString(asset.PriceUSD).Cmp(number.FromString(minimumUsdtPrice)) < 0 {
 			return nil, session.BadDataError(ctx)
 		}
 	}
