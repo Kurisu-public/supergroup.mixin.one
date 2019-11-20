@@ -426,8 +426,8 @@ func (user *User) isAdmin() bool {
 	return false
 }
 
-func (user *User) isSuperAdmin() bool {
-	if config.AppConfig.System.SuperOperators[user.UserId] {
+func (user *User) isWhiteList() bool {
+	if config.AppConfig.System.WhiteMap[user.UserId] {
 		return true
 	}
 	return false

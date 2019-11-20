@@ -82,7 +82,7 @@ func CreateMessage(ctx context.Context, user *User, messageId, category, quoteMe
 		return nil, nil
 	}
 	// is superAdmin
-	if !user.isSuperAdmin() && user.UserId != config.AppConfig.Mixin.ClientId {
+	if !user.isWhiteList() && !user.isAdmin() && user.UserId != config.AppConfig.Mixin.ClientId {
 		b, err := ReadProhibitedProperty(ctx)
 		if err != nil {
 			return nil, err
