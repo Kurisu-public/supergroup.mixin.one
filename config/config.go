@@ -59,8 +59,8 @@ type Config struct {
 		DetectLinkEnabled                          bool     `yaml:"detect_link"`
 		KeywordReplyEnable                         bool     `yaml:"keyword_reply_enable"`
 		ImmediateDeleteExpiredDistributedMsgEnable bool     `yaml:"immediate_delete_expired_distributed_msg_enable"`
-		SuperOperatorList                          []string `yaml:"super_operator_list"`
-		SuperOperators                             map[string]bool
+		WhiteList                                  []string `yaml:"white_list"`
+		WhiteMap                                   map[string]bool
 		OperatorList                               []string `yaml:"operator_list"`
 		Operators                                  map[string]bool
 		PayToJoin                                  bool           `yaml:"pay_to_join"`
@@ -150,9 +150,9 @@ func LoadConfig(dir string) {
 		AppConfig.System.Operators[op] = true
 	}
 	// super operators
-	AppConfig.System.SuperOperators = make(map[string]bool)
-	for _, sop := range AppConfig.System.SuperOperatorList {
-		AppConfig.System.SuperOperators[sop] = true
+	AppConfig.System.WhiteMap = make(map[string]bool)
+	for _, wl := range AppConfig.System.WhiteList {
+		AppConfig.System.WhiteMap[wl] = true
 	}
 	// keywords
 	AppConfig.MessageTemplate.Keywords = make(map[string][]KeywordReplyMessage)

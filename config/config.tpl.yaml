@@ -23,7 +23,7 @@ system:
   detect_link:                                     false
   keyword_reply_enable:                            false
   immediate_delete_expired_distributed_msg_enable: false
-  super_operator_list:
+  white_list:
     - "e9a5b807-fa8b-455a-8dfa-b189d28310ff"
   operator_list:
     - "e9a5b807-fa8b-455a-8dfa-b189d28310ff"
