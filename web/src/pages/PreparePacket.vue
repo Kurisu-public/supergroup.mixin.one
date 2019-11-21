@@ -67,6 +67,7 @@ export default {
     NavBar, RowSelect, Loading
   },
   async mounted () {
+    const packetMaxLimit = 200
     this.loading = true
     let prepareInfo = await this.GLOBAL.api.packet.prepare()
     if (prepareInfo) {
@@ -79,13 +80,18 @@ export default {
         this.form.memo = this.$t('prepare_packet.default_memo', {symbol: this.selectedAsset.symbol})
       }
       this.coversationId = prepareInfo.data.conversation.coversation_id
-      this.participantsCount = prepareInfo.data.conversation.participants_count
+
+      if (prepareInfo.data.conversation.participants_count < packetMaxLimit) {
+        this.participantsCount = prepareInfo.data.conversation.participants_count
+      } else {
+        this.participantsCount = packetMaxLimit
+      }
     }
     this.loading = false
   },
   computed: {
     validated () {
-      if (this.form.amount && this.form.shares && this.selectedAsset) {
+      if (this.form.amount && this.form.shares && this.selectedAsset && this.form.shares >= 1 && this.form.shares <= packetMaxLimit) {
         return true
       }
       return false
