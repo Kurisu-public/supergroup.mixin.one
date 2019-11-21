@@ -49,6 +49,8 @@ type Config struct {
 		MessageShardModifier                       string   `yaml:"message_shard_modifier"`
 		MessageShardSize                           int64    `yaml:"message_shard_size"`
 		PriceAssetsEnable                          bool     `yaml:"price_asset_enable"`
+		MinimumUsdtPrice                           string   `yaml:"minimum_usdt_price"`
+		MaximumPacketNumber                        int64    `yaml:"maximum_packet_number"`
 		AudioMessageEnable                         bool     `yaml:"audio_message_enable"`
 		ImageMessageEnable                         bool     `yaml:"image_message_enable"`
 		VideoMessageEnable                         bool     `yaml:"video_message_enable"`
