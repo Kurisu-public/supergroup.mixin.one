@@ -25,21 +25,15 @@ func distribute(ctx context.Context) {
 		go pendingActiveDistributedMessages(ctx, shard, limit)
 	}
 
-	var t *time.Ticker
 	if config.AppConfig.System.ImmediateDeleteExpiredDistributedMsgEnable {
-		t = time.NewTicker(time.Hour * 24)
-	}
-	for {
-		count, err := models.ClearUpExpiredDistributedMessages(ctx, shards)
-		if err != nil {
-			session.Logger(ctx).Errorf("ClearUpExpiredDistributedMessages ERROR: %+v", err)
-			time.Sleep(100 * time.Millisecond)
-			continue
-		}
-		if count < 100 {
-			if config.AppConfig.System.ImmediateDeleteExpiredDistributedMsgEnable {
-				<-t.C
-			} else {
+		for {
+			count, err := models.ClearUpExpiredDistributedMessages(ctx, shards)
+			if err != nil {
+				session.Logger(ctx).Errorf("ClearUpExpiredDistributedMessages ERROR: %+v", err)
+				time.Sleep(100 * time.Millisecond)
+				continue
+			}
+			if count < 100 {
 				time.Sleep(time.Minute)
 			}
 		}
