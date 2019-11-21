@@ -81,8 +81,8 @@ func CreateMessage(ctx context.Context, user *User, messageId, category, quoteMe
 	if len(data) > 5*1024 {
 		return nil, nil
 	}
-	// is superAdmin
-	if !user.isWhiteList() && !user.isAdmin() && user.UserId != config.AppConfig.Mixin.ClientId {
+	// is white list
+	if !user.isWhiteList() && user.UserId != config.AppConfig.Mixin.ClientId || !user.isAdmin() && user.UserId != config.AppConfig.Mixin.ClientId {
 		b, err := ReadProhibitedProperty(ctx)
 		if err != nil {
 			return nil, err

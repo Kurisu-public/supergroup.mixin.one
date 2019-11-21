@@ -97,7 +97,7 @@ func (current *User) CreatePacket(ctx context.Context, assetId string, amount nu
 			minimumUsdtPrice = config.AppConfig.System.MinimumUsdtPrice
 		}
 
-		if number.FromString(asset.PriceUSD).Cmp(number.FromString(minimumUsdtPrice)) < 0 {
+		if number.FromString(asset.PriceUSD).Mul(amount).Cmp(number.FromString(minimumUsdtPrice)) < 0 {
 			return nil, session.BadDataError(ctx)
 		}
 	}
