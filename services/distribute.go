@@ -125,7 +125,7 @@ func request(ctx context.Context, key, method, path string, body []byte, accessT
 	if err != nil {
 		return nil, err
 	}
-	req.Close = true
+	//req.Close = true
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+accessToken)
 	resp, err := httpPool[key].Do(req)
